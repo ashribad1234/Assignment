@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { createMediaClient, MediaItem, PhotoMedia, VideoMedia } from 'media-core';
 import { MediaProvider, useMediaEventTracker, useMediaSearch } from 'media-react';
 import { useMediaGrid, useMediaLightbox, useReelSwiper } from 'media-ui-react';
+import { DocsView } from './DocsView';
 
 const apiKey = import.meta.env.VITE_PEXELS_API_KEY || '';
 const client = createMediaClient({ apiKey, enableConsoleLogging: true });
@@ -66,11 +67,6 @@ function DemoContent() {
     <div>
       <header className="app-header">
         <div className="header-content">
-          <div className="logo-group">
-            <span className="logo-badge">SDK</span>
-            <h1 className="app-title">Headless Media Explorer</h1>
-          </div>
-
           <form className="search-form" onSubmit={handleSearchSubmit}>
             <input
               type="text"
@@ -238,9 +234,36 @@ function DemoContent() {
 }
 
 export function App() {
+  const [viewMode, setViewMode] = useState<'demo' | 'docs'>('demo');
+
   return (
     <MediaProvider client={client}>
-      <DemoContent />
+      <div className="app-root">
+        <nav className="top-nav">
+          <div className="top-nav-content">
+            <div className="logo-group">
+              <span className="logo-badge">SDK</span>
+              <span className="logo-title">Headless Media Ecosystem</span>
+            </div>
+            <div className="view-switcher">
+              <button
+                className={`nav-tab ${viewMode === 'demo' ? 'active' : ''}`}
+                onClick={() => setViewMode('demo')}
+              >
+                🚀 Live App Demo
+              </button>
+              <button
+                className={`nav-tab ${viewMode === 'docs' ? 'active' : ''}`}
+                onClick={() => setViewMode('docs')}
+              >
+                📖 Deployable Docs
+              </button>
+            </div>
+          </div>
+        </nav>
+
+        {viewMode === 'demo' ? <DemoContent /> : <DocsView />}
+      </div>
     </MediaProvider>
   );
 }
