@@ -1,7 +1,14 @@
 import React, { useState } from 'react';
 
-export function DocsView() {
-  const [activeDocSection, setActiveDocSection] = useState<'architecture' | 'core' | 'react' | 'ui-react' | 'ui-native' | 'skills'>('architecture');
+export interface DocsViewProps {
+  docType: 'sdk' | 'components';
+  onNavigate: (path: string) => void;
+}
+
+export function DocsView({ docType, onNavigate }: DocsViewProps) {
+  const [activeDocSection, setActiveDocSection] = useState<string>(
+    docType === 'sdk' ? 'core' : 'ui-react'
+  );
   const [copiedSnippet, setCopiedSnippet] = useState<string | null>(null);
 
   const copyToClipboard = (text: string, label: string) => {
@@ -13,57 +20,78 @@ export function DocsView() {
   return (
     <div className="docs-container">
       <aside className="docs-sidebar">
-        <h3 className="docs-sidebar-title">Documentation</h3>
+        <h3 className="docs-sidebar-title">
+          {docType === 'sdk' ? 'SDK Documentation' : 'Component Documentation'}
+        </h3>
         <nav className="docs-nav">
-          <button
-            className={`docs-nav-link ${activeDocSection === 'architecture' ? 'active' : ''}`}
-            onClick={() => setActiveDocSection('architecture')}
-          >
-            🏛️ Architecture & Rules
-          </button>
-          <button
-            className={`docs-nav-link ${activeDocSection === 'core' ? 'active' : ''}`}
-            onClick={() => setActiveDocSection('core')}
-          >
-            📦 media-core (Core SDK)
-          </button>
-          <button
-            className={`docs-nav-link ${activeDocSection === 'react' ? 'active' : ''}`}
-            onClick={() => setActiveDocSection('react')}
-          >
-            ⚛️ media-react & media-native
-          </button>
-          <button
-            className={`docs-nav-link ${activeDocSection === 'ui-react' ? 'active' : ''}`}
-            onClick={() => setActiveDocSection('ui-react')}
-          >
-            🎨 media-ui-react (Headless Web)
-          </button>
-          <button
-            className={`docs-nav-link ${activeDocSection === 'ui-native' ? 'active' : ''}`}
-            onClick={() => setActiveDocSection('ui-native')}
-          >
-            📱 media-ui-native (Headless Native)
-          </button>
-          <button
-            className={`docs-nav-link ${activeDocSection === 'skills' ? 'active' : ''}`}
-            onClick={() => setActiveDocSection('skills')}
-          >
-            🤖 AI Agent Skills
-          </button>
+          {docType === 'sdk' ? (
+            <>
+              <button
+                className={`docs-nav-link ${activeDocSection === 'core' ? 'active' : ''}`}
+                onClick={() => setActiveDocSection('core')}
+              >
+                📦 media-core (Core SDK)
+              </button>
+              <button
+                className={`docs-nav-link ${activeDocSection === 'react' ? 'active' : ''}`}
+                onClick={() => setActiveDocSection('react')}
+              >
+                ⚛️ media-react & media-native
+              </button>
+              <button
+                className={`docs-nav-link ${activeDocSection === 'architecture' ? 'active' : ''}`}
+                onClick={() => setActiveDocSection('architecture')}
+              >
+                🏛️ Architectural Boundaries
+              </button>
+              <button
+                className={`docs-nav-link ${activeDocSection === 'skills' ? 'active' : ''}`}
+                onClick={() => setActiveDocSection('skills')}
+              >
+                🤖 AI Data Skill
+              </button>
+            </>
+          ) : (
+            <>
+              <button
+                className={`docs-nav-link ${activeDocSection === 'ui-react' ? 'active' : ''}`}
+                onClick={() => setActiveDocSection('ui-react')}
+              >
+                🎨 media-ui-react (Headless Web)
+              </button>
+              <button
+                className={`docs-nav-link ${activeDocSection === 'ui-native' ? 'active' : ''}`}
+                onClick={() => setActiveDocSection('ui-native')}
+              >
+                📱 media-ui-native (Headless Native)
+              </button>
+              <button
+                className={`docs-nav-link ${activeDocSection === 'architecture' ? 'active' : ''}`}
+                onClick={() => setActiveDocSection('architecture')}
+              >
+                🏛️ Headless Philosophy
+              </button>
+              <button
+                className={`docs-nav-link ${activeDocSection === 'skills' ? 'active' : ''}`}
+                onClick={() => setActiveDocSection('skills')}
+              >
+                🤖 AI Component Skill
+              </button>
+            </>
+          )}
         </nav>
       </aside>
 
       <main className="docs-content">
         {activeDocSection === 'architecture' && (
           <section className="docs-section">
-            <h2 className="docs-h2">Architectural Rules & Package Hierarchy</h2>
+            <h2 className="docs-h2">Architectural Rules & Package Boundaries</h2>
             <p className="docs-lead">
-              The SDK ecosystem strictly separates data/business logic from UI presentation layers.
+              The SDK ecosystem strictly enforces single-direction dependency flow and clear separation of concerns.
             </p>
 
             <div className="docs-card">
-              <h3>Dependency Direction Diagram</h3>
+              <h3>Package Hierarchy Diagram</h3>
               <pre className="code-block">
 {`                    apps/web
                    /        \\
@@ -102,7 +130,7 @@ export function DocsView() {
 
         {activeDocSection === 'core' && (
           <section className="docs-section">
-            <h2 className="docs-h2">media-core API Documentation</h2>
+            <h2 className="docs-h2">media-core SDK Reference</h2>
             <p className="docs-lead">Framework-agnostic media SDK client for Pexels API normalization, caching, and event dispatching.</p>
 
             <h3 className="docs-h3">Client Initialization</h3>
@@ -328,15 +356,17 @@ return (
             <h2 className="docs-h2">AI Agent Skill Instructions</h2>
             <p className="docs-lead">Concrete SKILL.md documentation files for AI coding assistants.</p>
 
-            <div className="docs-card">
-              <h3>skills/media-data/SKILL.md</h3>
-              <p>Provides AI agents with exact patterns for initializing <code>MediaProvider</code>, handling <code>useMediaSearch</code> pagination, handling error status codes with <code>MediaError</code>, and managing <code>view</code>/<code>download</code> events.</p>
-            </div>
-
-            <div className="docs-card">
-              <h3>skills/media-components/SKILL.md</h3>
-              <p>Provides AI agents with prop-getter contracts for headless components (<code>useMediaGrid</code>, <code>useMediaLightbox</code>, <code>useReelSwiper</code>) while enforcing strict UI independence.</p>
-            </div>
+            {docType === 'sdk' ? (
+              <div className="docs-card">
+                <h3>skills/media-data/SKILL.md</h3>
+                <p>Provides AI agents with exact patterns for initializing <code>MediaProvider</code>, handling <code>useMediaSearch</code> pagination, handling error status codes with <code>MediaError</code>, and managing <code>view</code>/<code>download</code> events.</p>
+              </div>
+            ) : (
+              <div className="docs-card">
+                <h3>skills/media-components/SKILL.md</h3>
+                <p>Provides AI agents with prop-getter contracts for headless components (<code>useMediaGrid</code>, <code>useMediaLightbox</code>, <code>useReelSwiper</code>) while enforcing strict UI independence.</p>
+              </div>
+            )}
           </section>
         )}
       </main>

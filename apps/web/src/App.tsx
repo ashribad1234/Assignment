@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { createMediaClient, MediaItem, PhotoMedia, VideoMedia } from 'media-core';
 import { MediaProvider, useMediaEventTracker, useMediaSearch } from 'media-react';
 import { useMediaGrid, useMediaLightbox, useReelSwiper } from 'media-ui-react';
@@ -233,8 +233,31 @@ function DemoContent() {
   );
 }
 
+const getInitialPath = () => (typeof window !== 'undefined' ? window.location.pathname : '/');
+
 export function App() {
-  const [viewMode, setViewMode] = useState<'demo' | 'docs'>('demo');
+  const [currentPath, setCurrentPath] = useState<string>(getInitialPath);
+
+  useEffect(() => {
+    const handlePopState = () => {
+      setCurrentPath(window.location.pathname);
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+    };
+  }, []);
+
+  const navigate = (path: string) => {
+    if (typeof window !== 'undefined') {
+      window.history.pushState({}, '', path);
+      setCurrentPath(path);
+    }
+  };
+
+  const isSdkDocs = currentPath.startsWith('/docs/sdk');
+  const isComponentDocs = currentPath.startsWith('/docs/components');
+  const isDemo = !isSdkDocs && !isComponentDocs;
 
   return (
     <MediaProvider client={client}>
@@ -247,22 +270,30 @@ export function App() {
             </div>
             <div className="view-switcher">
               <button
-                className={`nav-tab ${viewMode === 'demo' ? 'active' : ''}`}
-                onClick={() => setViewMode('demo')}
+                className={`nav-tab ${isDemo ? 'active' : ''}`}
+                onClick={() => navigate('/')}
               >
                 🚀 Live App Demo
               </button>
               <button
-                className={`nav-tab ${viewMode === 'docs' ? 'active' : ''}`}
-                onClick={() => setViewMode('docs')}
+                className={`nav-tab ${isSdkDocs ? 'active' : ''}`}
+                onClick={() => navigate('/docs/sdk')}
               >
-                📖 Deployable Docs
+                📦 SDK Docs (/docs/sdk)
+              </button>
+              <button
+                className={`nav-tab ${isComponentDocs ? 'active' : ''}`}
+                onClick={() => navigate('/docs/components')}
+              >
+                🎨 Component Docs (/docs/components)
               </button>
             </div>
           </div>
         </nav>
 
-        {viewMode === 'demo' ? <DemoContent /> : <DocsView />}
+        {isDemo && <DemoContent />}
+        {isSdkDocs && <DocsView docType="sdk" onNavigate={navigate} />}
+        {isComponentDocs && <DocsView docType="components" onNavigate={navigate} />}
       </div>
     </MediaProvider>
   );
